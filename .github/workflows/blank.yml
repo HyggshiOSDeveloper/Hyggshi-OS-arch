@@ -1,0 +1,30 @@
+on:
+  push:
+    branches: [main]
+
+name: Build ISO
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install archiso deps
+        run: pacman -Syu --noconfirm archiso
+
+      - name: Set executable permissions
+        run: chmod +x profile/airootfs/root/customize_airootfs.sh
+
+      - name: Build ISO
+        run: mkarchiso -v -w work/ -o out/ profile/
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: archlinux-iso
+          path: out/
