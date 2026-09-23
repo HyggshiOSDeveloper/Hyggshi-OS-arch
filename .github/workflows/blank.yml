@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install archiso deps
-        run: pacman -Syu --noconfirm archiso
+        run: pacman -Syu --noconfirm archiso grub dosfstools edk2-ovmf mtools libisoburn erofs-utils
 
       - name: Bootstrap missing archiso profile files
         run: |
