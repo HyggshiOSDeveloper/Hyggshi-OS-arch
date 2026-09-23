@@ -17,8 +17,16 @@ jobs:
       - name: Install archiso deps
         run: pacman -Syu --noconfirm archiso
 
+      - name: Bootstrap missing archiso profile files
+        run: |
+          for f in pacman.conf syslinux grub efiboot; do
+            if [ ! -e "profile/$f" ]; then
+              cp -r "/usr/share/archiso/configs/releng/$f" "profile/$f"
+            fi
+          done
+
       - name: Set executable permissions
-        run: chmod +x profile/airootfs/root/customize_airootfs.sh
+        run: find profile/airootfs -type f -name "*.sh" -exec chmod +x {} \;
 
       - name: Build ISO
         run: mkarchiso -v -w work/ -o out/ profile/
