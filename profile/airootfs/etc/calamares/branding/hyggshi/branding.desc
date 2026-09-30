@@ -11,11 +11,11 @@ navigation: widget
 
 strings:
   productName: Hyggshi OS
-  shortProductName: Hyggshi
-  version: "Arch Edition"
-  shortVersion: "Arch"
-  versionedName: Hyggshi OS Arch Edition
-  shortVersionedName: Hyggshi OS
+  shortProductName: Hyggshi OS
+  version: "2.0.0 alpha Arch Edition"
+  shortVersion: "2.0.0"
+  versionedName: Hyggshi OS 2.0.0 Arch Edition
+  shortVersionedName: Hyggshi OS 2.0.0
   bootloaderEntryName: Hyggshi OS
   productUrl: https://github.com/Hyggshi-OS-project-center
   supportUrl: https://github.com/Hyggshi-OS-project-center
@@ -26,6 +26,8 @@ images:
   productLogo: "logo.png"
   productIcon: "logo.png"
   productWelcome: "welcome.png"
+  
+slideshow:	  "show.qml"
 
 style:
   sidebarBackground: "#1f2430"
@@ -33,5 +35,4 @@ style:
   sidebarTextSelect: "#7aa2f7"
   sidebarTextHighlight: "#3b4261"
 
-slideshow: "show.qml"
 slideshowAPI: 2
