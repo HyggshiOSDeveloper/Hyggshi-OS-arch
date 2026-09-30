@@ -1,7 +1,7 @@
 ---
 componentName: hyggshi
 
-welcomeStyleCalamares: false
+welcomeStyleCalamares: true
 welcomeExpandingLogo: true
 windowExpanding: normal
 windowSize: 900px,560px
@@ -34,5 +34,6 @@ style:
   sidebarText: "#ffffff"
   sidebarTextSelect: "#7aa2f7"
   sidebarTextHighlight: "#3b4261"
+  SidebarBackgroundCurrent: "#2e3242ff"
 
 slideshowAPI: 2
