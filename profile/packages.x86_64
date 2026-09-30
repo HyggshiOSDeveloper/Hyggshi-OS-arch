@@ -164,6 +164,68 @@ ttf-liberation
 phonon-qt6-vlc
 firefox
 
+# --- Software center (Discover) ---
+discover
+packagekit-qt6
+archlinux-appstream-data
+flatpak
+flatpak-kcm
+fwupd
+
+# --- KDE apps ---
+gwenview
+okular
+kcalc
+kolourpaint
+filelight
+elisa
+haruna
+kdeconnect
+kwalletmanager
+kinfocenter
+partitionmanager
+plasma-disks
+kio-admin
+kio-extras
+kio-fuse
+kdegraphics-thumbnailers
+ffmpegthumbs
+kimageformats
+qt6-imageformats
+power-profiles-daemon
+
+# --- Office / internet / media ---
+libreoffice-fresh
+libreoffice-fresh-vi
+thunderbird
+firefox-i18n-vi
+vlc
+
+# --- Printing + Bluetooth ---
+cups
+print-manager
+system-config-printer
+bluez
+bluez-utils
+
+# --- Fonts + Vietnamese input (fcitx5-unikey) ---
+noto-fonts-emoji
+fcitx5-im
+fcitx5-unikey
+
+# --- Dev / everyday CLI ---
+base-devel
+git
+wget
+curl
+htop
+fastfetch
+unzip
+zip
+p7zip
+unrar
+bash-completion
+
 # --- Installer: Calamares (from local AUR-built repo) + tools it shells out to ---
 calamares
 os-prober

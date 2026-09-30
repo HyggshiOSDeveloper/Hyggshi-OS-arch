@@ -1,0 +1,11 @@
+[kdeglobals][General]
+ColorScheme=Hyggshi
+
+[kdeglobals][Icons]
+Theme=breeze-dark
+
+[kdeglobals][KDE]
+widgetStyle=Breeze
+
+[Wallpaper]
+Image=Hyggshi

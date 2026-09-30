@@ -32,3 +32,14 @@ sudo mkarchiso -v -w work/ -o out/ profile/
 | `profile/airootfs/etc/calamares/` | Calamares settings, modules, branding |
 | `profile/airootfs/usr/local/bin/hyggshi-live-setup` | Creates `liveuser` at live boot |
 | `profile/airootfs/usr/local/bin/hyggshi-post-install` | Strips live-ISO leftovers from the installed system |
+
+## Look & feel
+
+- Wallpaper: `/usr/share/wallpapers/Hyggshi`
+- Colour scheme + accent: `/usr/share/color-schemes/Hyggshi.colors` (accent `#7aa2f7`)
+- Default panel layout: `/usr/share/plasma/look-and-feel/org.hyggshi.desktop/contents/layouts/`
+- Per-user defaults for new accounts: `profile/airootfs/etc/skel/.config/`
+- SDDM background: `profile/airootfs/usr/share/sddm/themes/breeze/theme.conf.user`
+
+If the custom panel misbehaves, delete the `LookAndFeelPackage=org.hyggshi.desktop` line from
+`etc/skel/.config/kdeglobals` to get the stock KDE panel back.

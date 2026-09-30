@@ -18,7 +18,7 @@ rm -f  /etc/systemd/logind.conf.d/do-not-suspend.conf
 rm -f  /etc/systemd/journald.conf.d/volatile-storage.conf
 rm -f  /etc/motd /etc/pacman.d/hooks/uncomment-mirrors.hook
 rm -f  /root/.automated_script.sh /root/.zlogin
-rm -f  /usr/local/bin/{hyggshi-live-setup,choose-mirror,livecd-sound,Installation_guide}
+rm -f  /usr/local/bin/{hyggshi-rebrand,hyggshi-live-setup,choose-mirror,livecd-sound,Installation_guide}
 rm -rf /usr/local/share/hyggshi /usr/local/share/livecd-sound
 # the live ISO's package keyring lives on tmpfs; the installed system needs its own
 pacman-key --init && pacman-key --populate archlinux

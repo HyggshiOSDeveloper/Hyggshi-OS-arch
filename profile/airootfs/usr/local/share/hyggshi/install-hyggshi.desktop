@@ -4,6 +4,6 @@ Version=1.0
 Name=Install Hyggshi OS
 Comment=Install Hyggshi OS to disk
 Exec=sudo -E calamares
-Icon=system-software-install
+Icon=hyggshi-logo
 Terminal=false
 Categories=System;
