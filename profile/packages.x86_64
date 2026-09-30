@@ -149,6 +149,6 @@ ttf-dejavu
 ttf-liberation
 firefox
 
-# --- Installer: Calamares (from chaotic-aur) + tools it shells out to ---
+# --- Installer: Calamares (from local AUR-built repo) + tools it shells out to ---
 calamares
 os-prober

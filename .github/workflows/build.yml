@@ -18,39 +18,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Calamares is only available from Chaotic-AUR (not in core/extra).
-      # Chaotic's CDN returns 503 now and then, so retry and fall back to another host.
-      - name: Add Chaotic-AUR (for Calamares)
+      # Calamares is not in core/extra, so build it from the AUR into a local repo
+      # (profile/pacman.conf points at /opt/localrepo). The AUR web UI is behind a
+      # bot wall, so we clone from the official GitHub mirror of the AUR instead.
+      - name: Build Calamares (AUR) into a local repo
         shell: bash
         run: |
           set -eu
-          KEY=3056513887B78AEB
-          pacman-key --init
-          for i in 1 2 3 4 5; do
-            pacman-key --recv-key "$KEY" --keyserver keyserver.ubuntu.com && break
-            sleep 10
-          done
-          pacman-key --lsign-key "$KEY"
-
-          fetch() {  # fetch <file> -> tries several hosts, several times
-            for i in 1 2 3 4 5; do
-              for host in cdn-mirror.chaotic.cx geo-mirror.chaotic.cx; do
-                curl -fsSL --retry 2 -o "/tmp/$1" "https://$host/chaotic-aur/$1" && return 0
-              done
-              sleep 15
-            done
-            return 1
-          }
-
-          fetch chaotic-keyring.pkg.tar.zst
-          pacman -U --noconfirm /tmp/chaotic-keyring.pkg.tar.zst
-
-          if fetch chaotic-mirrorlist.pkg.tar.zst; then
-            pacman -U --noconfirm /tmp/chaotic-mirrorlist.pkg.tar.zst
-          else
-            echo "Server = https://geo-mirror.chaotic.cx/\$repo/\$arch" > /etc/pacman.d/chaotic-mirrorlist
-          fi
-          cat /etc/pacman.d/chaotic-mirrorlist
+          pacman -S --noconfirm --needed base-devel sudo git
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          sudo -u builder bash -euc '
+            git clone --depth 1 --branch calamares --single-branch \
+              https://github.com/archlinux/aur.git ~/calamares
+            cd ~/calamares
+            makepkg -s --noconfirm --needed
+          '
+          mkdir -p /opt/localrepo
+          cp /home/builder/calamares/*.pkg.tar.zst /opt/localrepo/
+          rm -f /opt/localrepo/*-debug-*.pkg.tar.zst
+          repo-add /opt/localrepo/hyggshi-local.db.tar.gz /opt/localrepo/*.pkg.tar.zst
+          ls -la /opt/localrepo
 
       - name: Build ISO
         run: mkarchiso -v -w work/ -o out/ profile/
