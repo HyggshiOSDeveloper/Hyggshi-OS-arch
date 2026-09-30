@@ -2,7 +2,7 @@
 
 Arch-based live + installer ISO built with [archiso](https://wiki.archlinux.org/title/Archiso).
 
-- **Desktop:** XFCE + LightDM
+- **Desktop:** KDE Plasma + SDDM
 - **Live session:** autologin as `liveuser` (password `liveuser`, passwordless sudo)
 - **Installer:** [Calamares](https://calamares.io) — "Install Hyggshi OS" icon on the desktop, or `sudo calamares`
 - **Networking:** NetworkManager (systemd-networkd / iwd / sshd are disabled in the live image)

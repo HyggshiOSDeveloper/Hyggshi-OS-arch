@@ -4,7 +4,7 @@
 set -u
 rm -f  /etc/mkinitcpio.conf.d/archiso.conf
 rm -f  /etc/sudoers.d/10-liveuser
-rm -f  /etc/lightdm/lightdm.conf.d/50-hyggshi-live.conf
+rm -f  /etc/sddm.conf.d/50-hyggshi-live.conf
 rm -f  /etc/systemd/system/getty@tty1.service.d/autologin.conf
 rmdir  /etc/systemd/system/getty@tty1.service.d 2>/dev/null
 for s in pacman-init choose-mirror livecd-talk livecd-alsa-unmuter hyggshi-live-setup; do

@@ -18,7 +18,7 @@ Presentation {
             horizontalAlignment: Text.AlignHCenter
             color: "#ffffff"
             font.pixelSize: 26
-            text: "Welcome to Hyggshi OS\nLightweight Arch + XFCE"
+            text: "Welcome to Hyggshi OS\nArch + KDE Plasma"
         }
     }
     Slide {

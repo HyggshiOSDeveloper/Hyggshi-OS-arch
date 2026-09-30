@@ -127,26 +127,41 @@ xfsprogs
 xl2tpd
 zsh
 
-# --- Desktop: XFCE + LightDM ---
+# --- Desktop: KDE Plasma + SDDM ---
 xorg-server
 xorg-xinit
 xf86-input-libinput
 mesa
-xfce4
-xfce4-goodies
-lightdm
-lightdm-gtk-greeter
+plasma-desktop
+plasma-x11-session
+kwin-x11
+plasma-nm
+plasma-pa
+kscreen
+powerdevil
+bluedevil
+breeze-gtk
+kde-gtk-config
+xdg-desktop-portal-kde
+kdeplasma-addons
+plasma-systemmonitor
+sddm
+sddm-kcm
+konsole
+dolphin
+kate
+ark
+spectacle
 networkmanager
-network-manager-applet
-pulseaudio
-pulseaudio-alsa
-pavucontrol
-gvfs
-file-roller
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
 xdg-user-dirs
 noto-fonts
 ttf-dejavu
 ttf-liberation
+phonon-qt6-vlc
 firefox
 
 # --- Installer: Calamares (from local AUR-built repo) + tools it shells out to ---
