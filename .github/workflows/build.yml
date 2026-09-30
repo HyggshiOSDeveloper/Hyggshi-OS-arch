@@ -18,15 +18,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Calamares is only available from Chaotic-AUR (not in core/extra)
+      # Calamares is only available from Chaotic-AUR (not in core/extra).
+      # Chaotic's CDN returns 503 now and then, so retry and fall back to another host.
       - name: Add Chaotic-AUR (for Calamares)
+        shell: bash
         run: |
-          pacman-key --init
-          pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
-          pacman-key --lsign-key 3056513887B78AEB
-          pacman -U --noconfirm \
-            'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' \
-            'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+          set -eu
+          KEY=3056513887B78AEB
+          for i in 1 2 3 4 5; do
+            pacman-key --recv-key "$KEY" --keyserver keyserver.ubuntu.com && break
+            sleep 10
+          done
+          pacman-key --lsign-key "$KEY"
+
+          fetch() {  # fetch <file> -> tries several hosts, several times
+            for i in 1 2 3 4 5; do
+              for host in cdn-mirror.chaotic.cx geo-mirror.chaotic.cx; do
+                curl -fsSL --retry 2 -o "/tmp/$1" "https://$host/chaotic-aur/$1" && return 0
+              done
+              sleep 15
+            done
+            return 1
+          }
+
+          fetch chaotic-keyring.pkg.tar.zst
+          pacman -U --noconfirm /tmp/chaotic-keyring.pkg.tar.zst
+
+          if fetch chaotic-mirrorlist.pkg.tar.zst; then
+            pacman -U --noconfirm /tmp/chaotic-mirrorlist.pkg.tar.zst
+          else
+            echo "Server = https://geo-mirror.chaotic.cx/\$repo/\$arch" > /etc/pacman.d/chaotic-mirrorlist
+          fi
+          cat /etc/pacman.d/chaotic-mirrorlist
 
       - name: Build ISO
         run: mkarchiso -v -w work/ -o out/ profile/
