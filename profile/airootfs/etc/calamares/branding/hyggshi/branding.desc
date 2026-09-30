@@ -1,0 +1,37 @@
+---
+componentName: hyggshi
+
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 900px,560px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+  productName: Hyggshi OS
+  shortProductName: Hyggshi
+  version: "Arch Edition"
+  shortVersion: "Arch"
+  versionedName: Hyggshi OS Arch Edition
+  shortVersionedName: Hyggshi OS
+  bootloaderEntryName: Hyggshi OS
+  productUrl: https://github.com/Hyggshi-OS-project-center
+  supportUrl: https://github.com/Hyggshi-OS-project-center
+  knownIssuesUrl: https://github.com/Hyggshi-OS-project-center
+  releaseNotesUrl: https://github.com/Hyggshi-OS-project-center
+
+images:
+  productLogo: "logo.png"
+  productIcon: "logo.png"
+  productWelcome: "welcome.png"
+
+style:
+  sidebarBackground: "#1f2430"
+  sidebarText: "#ffffff"
+  sidebarTextSelect: "#7aa2f7"
+  sidebarTextHighlight: "#3b4261"
+
+slideshow: "show.qml"
+slideshowAPI: 2

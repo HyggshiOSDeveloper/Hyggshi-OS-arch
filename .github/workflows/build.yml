@@ -1,0 +1,41 @@
+name: Build ISO
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux
+      options: --privileged
+    steps:
+      - name: Install archiso + deps
+        run: pacman -Syu --noconfirm archiso git grub dosfstools edk2-ovmf mtools libisoburn squashfs-tools rsync
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Calamares is only available from Chaotic-AUR (not in core/extra)
+      - name: Add Chaotic-AUR (for Calamares)
+        run: |
+          pacman-key --init
+          pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+          pacman-key --lsign-key 3056513887B78AEB
+          pacman -U --noconfirm \
+            'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' \
+            'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+      - name: Build ISO
+        run: mkarchiso -v -w work/ -o out/ profile/
+
+      - name: Checksums
+        run: cd out && sha256sum *.iso > SHA256SUMS
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyggshi-os-arch-iso
+          path: out/
