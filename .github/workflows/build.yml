@@ -25,6 +25,7 @@ jobs:
         run: |
           set -eu
           KEY=3056513887B78AEB
+          pacman-key --init
           for i in 1 2 3 4 5; do
             pacman-key --recv-key "$KEY" --keyserver keyserver.ubuntu.com && break
             sleep 10
