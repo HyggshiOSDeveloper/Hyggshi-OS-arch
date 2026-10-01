@@ -168,20 +168,13 @@ ttf-liberation
 phonon-qt6-vlc
 firefox
 plasma-workspace
-plasma-desktop
-plasma-nm
-plasma-pa
 plasma-browser-integration
 kde-cli-tools
-kde-config-systemd
-kde-gtk-config
 breeze
 breeze-icons
 
 # --- Software center (Discover) ---
 discover
-packagekit-qt6
-archlinux-appstream-data
 flatpak
 flatpak-kcm
 fwupd
@@ -210,7 +203,6 @@ power-profiles-daemon
 upower
 udisks2
 udisks2-btrfs
-bolt
 iio-sensor-proxy
 acpid
 
@@ -247,14 +239,4 @@ jq
 # --- Installer: Calamares (from local AUR-built repo) + tools it shells out to ---
 calamares
 os-prober
-efibootmgr
-grub
-dosfstools
-e2fsprogs
-btrfs-progs
-xfsprogs
-f2fs-tools
-exfatprogs
 ntfs-3g
-lvm2
-cryptsetup
