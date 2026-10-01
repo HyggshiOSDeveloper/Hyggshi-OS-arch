@@ -27,13 +27,14 @@ images:
   productIcon: "logo.png"
   productWelcome: "welcome.png"
   
-slideshow:	  "show.qml"
+slideshow: "show.qml"
 
 style:
-  sidebarBackground: "#1f2430"
-  sidebarText: "#ffffff"
-  sidebarTextSelect: "#7aa2f7"
-  sidebarTextHighlight: "#3b4261"
-  SidebarBackgroundCurrent: "#2e3242ff"
+  SidebarBackground: "#1f2430"
+  SidebarText: "#c0caf5"
+  SidebarTextSelect: "#ffffff"
+  SidebarTextHighlight: "#3b4261"
+  SidebarTextCurrent: "#ffffff"
+  SidebarBackgroundCurrent: "#3b4261"
 
 slideshowAPI: 2

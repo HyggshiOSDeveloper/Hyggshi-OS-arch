@@ -1,0 +1,12 @@
+NAME="Hyggshi OS"
+PRETTY_NAME="Hyggshi OS 2.0.0 Arch Edition"
+ID=hyggshi
+ID_LIKE=arch
+BUILD_ID=rolling
+VERSION="2.0.0 alpha"
+ANSI_COLOR="38;2;122;162;247"
+HOME_URL="https://github.com/Hyggshi-OS-project-center"
+DOCUMENTATION_URL="https://github.com/Hyggshi-OS-project-center"
+SUPPORT_URL="https://github.com/Hyggshi-OS-project-center"
+BUG_REPORT_URL="https://github.com/Hyggshi-OS-project-center"
+LOGO=hyggshi-logo
