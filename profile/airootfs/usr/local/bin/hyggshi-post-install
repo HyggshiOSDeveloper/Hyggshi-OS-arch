@@ -2,6 +2,19 @@
 # Runs in the *target* chroot right after unpackfs. Strips live-ISO leftovers
 # so the installed system is a normal Arch install.
 set -u
+
+# 1) archiso keeps the kernel on the ISO, not in the squashfs's /boot (mkarchiso empties it).
+#    The `linux` package also ships a copy under /usr/lib/modules/<ver>/vmlinuz - use that,
+#    otherwise mkinitcpio fails with "/boot/vmlinuz-linux must be readable".
+mkdir -p /boot
+k=$(ls -1 /usr/lib/modules/*/vmlinuz 2>/dev/null | sort -V | tail -n 1)
+if [ -z "$k" ]; then
+    echo "hyggshi-post-install: no kernel image found under /usr/lib/modules" >&2
+    exit 1
+fi
+cp -f "$k" /boot/vmlinuz-linux
+
+# 2) strip live-ISO leftovers (must happen BEFORE mkinitcpio runs)
 rm -f  /etc/mkinitcpio.conf.d/archiso.conf
 rm -f  /etc/sudoers.d/10-liveuser
 rm -f  /etc/sddm.conf.d/50-hyggshi-live.conf
