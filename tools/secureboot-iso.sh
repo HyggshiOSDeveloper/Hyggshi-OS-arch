@@ -85,9 +85,29 @@ echo "==> Rebuilding the ISO"
 pvd=$(xorriso -no_rc -indev "$in_iso" -pvd_info 2>&1)
 field() { printf '%s\n' "$pvd" | sed -n "s/^$1 *: *//p" | head -n1; }
 volid=$(field 'Volume Id'); publisher=$(field 'Publisher Id'); appid=$(field 'App Id')
+mod_time=$(field 'Modif. Time' | xargs)
 [[ -n $volid ]] || { echo "could not read the volume id" >&2; exit 1; }
+
+# Preserve modification timestamp so that the ISO filesystem UUID matches %ARCHISO_UUID%
+if [[ -z "$mod_time" ]]; then
+    uuid_file=$(find "$tree/boot" -maxdepth 1 -name "*.uuid" -printf "%f\n" 2>/dev/null | head -n1)
+    if [[ -n "$uuid_file" ]]; then
+        mod_time="${uuid_file%.uuid}"
+        mod_time="${mod_time//[^0-9]/}"
+    fi
+fi
+
+if [[ -n "$mod_time" && ${#mod_time} -ge 14 ]]; then
+    iso_epoch=$(date -u -d "${mod_time:0:4}-${mod_time:4:2}-${mod_time:6:2} ${mod_time:8:2}:${mod_time:10:2}:${mod_time:12:2}" +%s 2>/dev/null || true)
+    if [[ -n "$iso_epoch" ]]; then
+        export SOURCE_DATE_EPOCH="$iso_epoch"
+    fi
+fi
+
 extra=()
 (( $(du -s --apparent-size -B1M "$tree" | awk '{print $1}') > 900 )) && extra+=(-no-pad)
+[[ -n "$mod_time" ]] && extra+=(--modification-date="$mod_time")
+
 rm -f "$out_iso"
 xorriso -no_rc -as mkisofs \
     -iso-level 3 -full-iso9660-filenames -joliet -joliet-long -rational-rock \
@@ -100,11 +120,19 @@ xorriso -no_rc -as mkisofs \
     -isohybrid-gpt-basdat \
     -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot \
     "${extra[@]}" \
-    -output "$out_iso" "$tree/" >/dev/null 2>&1
+    -output "$out_iso" "$tree/" >/dev/null
 
 echo "==> Verifying"
 sbverify --cert "$crt" "${kernels[0]}" >/dev/null && echo "  kernel signature OK"
 sbverify --cert "$crt" "$work/grubx64.efi" >/dev/null && echo "  grub signature OK"
 sfdisk -d "$out_iso" | grep -q 'type=ef\|C12A7328' && echo "  EFI partition present"
+in_uuid=$(blkid -s UUID -o value "$in_iso" 2>/dev/null || true)
+out_uuid=$(blkid -s UUID -o value "$out_iso" 2>/dev/null || true)
+echo "  in_iso UUID:  $in_uuid"
+echo "  out_iso UUID: $out_uuid"
+if [[ -n "$in_uuid" && -n "$out_uuid" && "$in_uuid" != "$out_uuid" ]]; then
+    echo "::error::UUID mismatch between original ($in_uuid) and signed ($out_uuid)!"
+    exit 1
+fi
 echo "Done: $out_iso"
 echo "First boot with Secure Boot ON: choose 'Enroll key from disk' in MokManager and pick hyggshi-secureboot.cer."
