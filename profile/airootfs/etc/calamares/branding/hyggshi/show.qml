@@ -31,4 +31,14 @@ Presentation {
             text: "Installing...\nThis takes a few minutes."
         }
     }
+    Slide {
+        Rectangle { anchors.fill: parent; color: "#1f2430" }
+        Text {
+            anchors.centerIn: parent
+            horizontalAlignment: Text.AlignHCenter
+            color: "#ffffff"
+            font.pixelSize: 22
+            text: "Secure Boot turned on?\nOn the first restart choose  Enroll MOK  >  Continue  >  Yes\nand type the password:  hyggshi"
+        }
+    }
 }

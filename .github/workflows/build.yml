@@ -6,7 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Microsoft-signed shim (from Ubuntu's shim-signed). Baked into the ISO so the installed system can use it.
+  shim:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -y shim-signed
+      - run: |
+          mkdir shim
+          cp /usr/lib/shim/shimx64.efi.signed shim/shimx64.efi
+          cp /usr/lib/shim/mmx64.efi shim/mmx64.efi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shim-files
+          path: shim/
+
   build:
+    needs: shim
     runs-on: ubuntu-latest
     container:
       image: archlinux
@@ -17,6 +32,12 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Get shim for the installed system
+        uses: actions/download-artifact@v4
+        with:
+          name: shim-files
+          path: profile/airootfs/usr/share/hyggshi/secureboot
 
       # Calamares is not in core/extra, so build it from the AUR into a local repo
       # (profile/pacman.conf points at /opt/localrepo). The AUR web UI is behind a
@@ -50,4 +71,59 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hyggshi-os-arch-iso
+          path: out/
+
+  # Second job: make the ISO bootable with UEFI Secure Boot (shim + MOK).
+  # Needs the repository secrets SB_KEY and SB_CRT (PEM text of sb.key / sb.crt, see tools/gen-secureboot-keys.sh).
+  # Without them a one-off key is generated, which means users must re-enrol the key for every build.
+  secureboot:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space (ISO is rebuilt, needs ~3x its size)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Download ISO
+        uses: actions/download-artifact@v4
+        with:
+          name: hyggshi-os-arch-iso
+          path: in
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso mtools dosfstools sbsigntool shim-signed openssl fdisk
+
+      - name: Signing key
+        env:
+          SB_KEY: ${{ secrets.SB_KEY }}
+          SB_CRT: ${{ secrets.SB_CRT }}
+        run: |
+          mkdir keys
+          if [ -n "$SB_KEY" ] && [ -n "$SB_CRT" ]; then
+            printf '%s\n' "$SB_KEY" > keys/sb.key
+            printf '%s\n' "$SB_CRT" > keys/sb.crt
+            chmod 600 keys/sb.key
+          else
+            echo "::warning::SB_KEY/SB_CRT secrets not set - using a one-off key. Users must enrol it again for every build."
+            tools/gen-secureboot-keys.sh keys
+          fi
+
+      - name: Build Secure Boot ISO
+        run: |
+          iso=$(ls in/*.iso | head -n1)
+          mkdir -p out
+          tools/secureboot-iso.sh "$iso" "out/$(basename "$iso" .iso)-secureboot.iso" keys/sb.key keys/sb.crt
+          cp keys/sb.crt out/hyggshi-secureboot.crt
+          (cd out && sha256sum *.iso > SHA256SUMS)
+
+      - name: Upload Secure Boot ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyggshi-os-arch-secureboot-iso
           path: out/

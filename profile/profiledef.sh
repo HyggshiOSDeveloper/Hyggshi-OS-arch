@@ -25,6 +25,8 @@ file_permissions=(
   ["/usr/local/bin/livecd-sound"]="0:0:755"
   ["/usr/local/bin/hyggshi-live-setup"]="0:0:755"
   ["/usr/local/bin/hyggshi-rebrand"]="0:0:755"
+  ["/usr/local/bin/hyggshi-secureboot"]="0:0:755"
+  ["/usr/local/bin/hyggshi-icons"]="0:0:755"
   ["/usr/local/bin/hyggshi-post-install"]="0:0:755"
   ["/usr/local/share/hyggshi/install-hyggshi.desktop"]="0:0:755"
 )
