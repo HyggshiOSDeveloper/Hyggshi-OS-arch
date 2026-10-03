@@ -111,14 +111,13 @@ ForegroundPositive=158,206,106
 ForegroundVisited=187,154,247
 
 [General]
-ColorScheme=Hyggshi
+ColorScheme=HyggshiDark
+Name=Hyggshi Dark
 AccentColor=122,162,247
 shadeSortColumn=true
 
 [KDE]
 contrast=4
-LookAndFeelPackage=org.hyggshi.desktop
-widgetStyle=Breeze
 
 [WM]
 activeBackground=26,30,41
@@ -127,10 +126,3 @@ activeForeground=192,202,245
 inactiveBackground=31,36,48
 inactiveBlend=130,140,170
 inactiveForeground=130,140,170
-
-[Icons]
-Theme=breeze-dark
-
-[Mouse]
-cursorTheme=Hyggshi-Cursors
-cursorSize=24

@@ -7,5 +7,9 @@ Theme=breeze-dark
 [kdeglobals][KDE]
 widgetStyle=Breeze
 
+[kdeglobals][Mouse]
+cursorTheme=Hyggshi-Cursors
+cursorSize=24
+
 [Wallpaper]
 Image=Hyggshi

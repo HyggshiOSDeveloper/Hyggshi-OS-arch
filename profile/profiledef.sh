@@ -28,5 +28,7 @@ file_permissions=(
   ["/usr/local/bin/hyggshi-secureboot"]="0:0:755"
   ["/usr/local/bin/hyggshi-icons"]="0:0:755"
   ["/usr/local/bin/hyggshi-post-install"]="0:0:755"
+  ["/usr/local/bin/hyggshi-welcome"]="0:0:755"
+  ["/usr/local/bin/hyggshi-hardware"]="0:0:755"
   ["/usr/local/share/hyggshi/install-hyggshi.desktop"]="0:0:755"
 )

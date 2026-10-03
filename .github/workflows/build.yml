@@ -1,7 +1,9 @@
-name: Build ISO
+name: Build & Verify ISO
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -10,12 +12,17 @@ jobs:
   shim:
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt-get update && sudo apt-get install -y shim-signed
-      - run: |
+      - name: Install shim-signed
+        run: sudo apt-get update && sudo apt-get install -y shim-signed
+
+      - name: Extract shim and mm binaries
+        run: |
           mkdir shim
           cp /usr/lib/shim/shimx64.efi.signed shim/shimx64.efi
           cp /usr/lib/shim/mmx64.efi shim/mmx64.efi
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload Shim Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: shim-files
           path: shim/
@@ -27,26 +34,22 @@ jobs:
       image: archlinux
       options: --privileged
     steps:
-      - name: Install archiso + deps
-        run: pacman -Syu --noconfirm archiso git grub dosfstools edk2-ovmf mtools libisoburn squashfs-tools rsync
+      - name: Install archiso + dependencies
+        run: pacman -Syu --noconfirm archiso git grub dosfstools edk2-ovmf mtools libisoburn squashfs-tools rsync base-devel sudo
 
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get shim for the installed system
+      - name: Inject Shim into airootfs
         uses: actions/download-artifact@v4
         with:
           name: shim-files
           path: profile/airootfs/usr/share/hyggshi/secureboot
 
-      # Calamares is not in core/extra, so build it from the AUR into a local repo
-      # (profile/pacman.conf points at /opt/localrepo). The AUR web UI is behind a
-      # bot wall, so we clone from the official GitHub mirror of the AUR instead.
-      - name: Build Calamares (AUR) into a local repo
+      - name: Build Calamares (AUR) & Hyggshi Packages
         shell: bash
         run: |
           set -eu
-          pacman -S --noconfirm --needed base-devel sudo git
           useradd -m builder
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
           sudo -u builder bash -euc '
@@ -58,48 +61,48 @@ jobs:
           mkdir -p /opt/localrepo
           cp /home/builder/calamares/*.pkg.tar.zst /opt/localrepo/
           rm -f /opt/localrepo/*-debug-*.pkg.tar.zst
-          repo-add /opt/localrepo/hyggshi-local.db.tar.gz /opt/localrepo/*.pkg.tar.zst
-          ls -la /opt/localrepo
+          repo-add /opt/localrepo/hyggshi.db.tar.gz /opt/localrepo/*.pkg.tar.zst
+          ln -sf hyggshi.db.tar.gz /opt/localrepo/hyggshi-local.db.tar.gz
+          ls -lh /opt/localrepo
 
-      - name: Build ISO
+      - name: Build Hyggshi ISO Image
         run: mkarchiso -v -w work/ -o out/ profile/
 
-      - name: Checksums
+      - name: Generate Checksums
         run: cd out && sha256sum *.iso > SHA256SUMS
 
-      - name: Upload ISO
+      - name: Upload Unsigned ISO Artifact
         uses: actions/upload-artifact@v4
         with:
           name: hyggshi-os-arch-iso
           path: out/
 
-  # Second job: make the ISO bootable with UEFI Secure Boot (shim + MOK).
-  # Needs the repository secrets SB_KEY and SB_CRT (PEM text of sb.key / sb.crt, see tools/gen-secureboot-keys.sh).
-  # Without them a one-off key is generated, which means users must re-enrol the key for every build.
+  # Secure Boot Signing Job:
+  # Uses SB_KEY and SB_CRT secrets if available, or falls back to a generated key.
   secureboot:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Free disk space (ISO is rebuilt, needs ~3x its size)
+      - name: Free Disk Space
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           df -h /
 
-      - name: Download ISO
+      - name: Download Raw ISO
         uses: actions/download-artifact@v4
         with:
           name: hyggshi-os-arch-iso
           path: in
 
-      - name: Install tools
+      - name: Install Signing Tools
         run: |
           sudo apt-get update
           sudo apt-get install -y xorriso mtools dosfstools sbsigntool shim-signed openssl fdisk
 
-      - name: Signing key
+      - name: Prepare Signing Keys
         env:
           SB_KEY: ${{ secrets.SB_KEY }}
           SB_CRT: ${{ secrets.SB_CRT }}
@@ -110,20 +113,55 @@ jobs:
             printf '%s\n' "$SB_CRT" > keys/sb.crt
             chmod 600 keys/sb.key
           else
-            echo "::warning::SB_KEY/SB_CRT secrets not set - using a one-off key. Users must enrol it again for every build."
+            echo "::warning::SB_KEY/SB_CRT secrets not set - generating one-off key for this run."
             tools/gen-secureboot-keys.sh keys
           fi
 
-      - name: Build Secure Boot ISO
+      - name: Sign & Rebuild Secure Boot ISO
         run: |
-          iso=$(ls in/*.iso | head -n1)
+          raw_iso=$(ls in/*.iso | head -n1)
           mkdir -p out
-          tools/secureboot-iso.sh "$iso" "out/$(basename "$iso" .iso)-secureboot.iso" keys/sb.key keys/sb.crt
+          final_iso="out/Hyggshi-OS-Arch-KDE-x86_64.iso"
+          tools/secureboot-iso.sh "$raw_iso" "$final_iso" keys/sb.key keys/sb.crt
+          openssl x509 -in keys/sb.crt -outform DER -out out/hyggshi-secureboot.cer
           cp keys/sb.crt out/hyggshi-secureboot.crt
-          (cd out && sha256sum *.iso > SHA256SUMS)
+          (cd out && sha256sum Hyggshi-OS-Arch-KDE-x86_64.iso > Hyggshi-OS-Arch-KDE-x86_64.iso.sha256)
+          ls -lh out/
 
-      - name: Upload Secure Boot ISO
+      - name: Upload Secure Boot Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: hyggshi-os-arch-secureboot-iso
+          name: Hyggshi-OS-Arch-KDE-x86_64
           path: out/
+
+  # Automated Verification Job
+  verify:
+    needs: secureboot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Signed ISO
+        uses: actions/download-artifact@v4
+        with:
+          name: Hyggshi-OS-Arch-KDE-x86_64
+          path: signed
+
+      - name: Install Verification Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso mtools dosfstools sbsigntool openssl fdisk
+
+      - name: Verify ISO Checksum
+        run: |
+          cd signed
+          sha256sum -c Hyggshi-OS-Arch-KDE-x86_64.iso.sha256
+
+      - name: Inspect ISO Structure
+        run: |
+          tools/inspect-iso.sh signed/Hyggshi-OS-Arch-KDE-x86_64.iso
+
+      - name: Run Automated Secure Boot Verification
+        run: |
+          tools/verify-secureboot.sh signed/Hyggshi-OS-Arch-KDE-x86_64.iso signed/hyggshi-secureboot.crt
