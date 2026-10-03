@@ -117,7 +117,11 @@ if [[ "$HEADLESS" -eq 1 ]]; then
     QEMU_CMD+=(-nographic -serial mon:stdio)
     echo "==> Running in HEADLESS mode"
 else
-    QEMU_CMD+=(-vga virtio -display gtk,gl=on 2>/dev/null || QEMU_CMD+=(-vga virtio))
+    if qemu-system-x86_64 -display gtk,gl=on -version >/dev/null 2>&1; then
+        QEMU_CMD+=(-vga virtio -display gtk,gl=on)
+    else
+        QEMU_CMD+=(-vga virtio -display gtk)
+    fi
 fi
 
 if [[ "$TIMEOUT" -gt 0 ]]; then
